@@ -5,46 +5,41 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 
-public class TCP_NIOStream {
+public class TCP_NIOStream2 {
     public static void main(String[] args) throws Exception {
         SocketChannel channel = SocketChannel.open(
                 new InetSocketAddress("36.50.135.242", 2211)
         );
 
-        // a.
-        sendFrame(channel, "B23DCCN199;eFLd1xyo");
+        // a. Gửi MSSV + mã câu hỏi
+        sendFrame(channel, "B23DCCN199;HJJZtDeB");
 
-        // b.
-        String http = receiveFrame(channel)
-                    + receiveFrame(channel)
-                    + receiveFrame(channel);
+        // b. Nhận 2 frame
+        String json = receiveFrame(channel) + receiveFrame(channel);
 
-        // c.
-        String[] lines = http.split("\r\n");
-        String[] firstLine = lines[0].split(" ");
+        // c. Lấy dữ liệu từ JSON
+        String event = json.split("\"event\"\\s*:\\s*\"")[1].split("\"")[0];
+        String user = json.split("\"user\"\\s*:\\s*\"")[1].split("\"")[0];
 
-        String method = firstLine[0];
-        String path = firstLine[1];
-        String host = "";
+        String okValue = json.split("\"ok\"\\s*:\\s*")[1]
+                             .split("[,}]")[0]
+                             .trim();
 
-        for (String line : lines) {
-            if (line.startsWith("Host:")) {
-                host = line.substring(5).trim();
-                break;
-            }
-        }
+        String ok = okValue.equals("true") ? "1" : "0";
 
-        sendFrame(channel, method + ";" + path + ";" + host);
+        sendFrame(channel,
+                "event=" + event + ";user=" + user + ";ok=" + ok);
 
-        // d.
         channel.close();
     }
 
     static void readFully(SocketChannel channel, ByteBuffer buffer)
             throws Exception {
+
         while (buffer.hasRemaining()) {
-            if (channel.read(buffer) == -1)
-                throw new Exception("Server disconnected");
+            if (channel.read(buffer) == -1) {
+                throw new Exception();
+            }
         }
     }
 
@@ -63,9 +58,11 @@ public class TCP_NIOStream {
 
     static void sendFrame(SocketChannel channel, String data)
             throws Exception {
+
         byte[] payload = data.getBytes(StandardCharsets.UTF_8);
 
         ByteBuffer buffer = ByteBuffer.allocate(4 + payload.length);
+
         buffer.putInt(payload.length);
         buffer.put(payload);
         buffer.flip();
