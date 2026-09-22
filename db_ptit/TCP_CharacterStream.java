@@ -19,7 +19,7 @@ public class TCP_CharacterStream {
         // b.
         String str = br.readLine();
         String[] arr = str.split(",");
-        StringBuffer result = new  StringBuffer();
+        StringBuffer result = new StringBuffer();
 
         // c.
         for (String s: arr) {
