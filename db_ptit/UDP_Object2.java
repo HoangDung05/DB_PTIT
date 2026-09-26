@@ -27,10 +27,10 @@ public class UDP_Object2 {
         socket.receive(receivePacket);
 
         // Tach 8 byte dau de lay requestId
-        String requestId = new String(buffer, 0, 8);
+        String requestId = new String(receivePacket.getData(), 0, 8);
 
         // Tach cac byte con lai de lay object Customer
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer, 8, receivePacket.getLength() - 8);
+        ByteArrayInputStream bais = new ByteArrayInputStream(receivePacket.getData(), 8, receivePacket.getLength() - 8);
         ObjectInputStream ois = new ObjectInputStream(bais);
         Customer customer = (Customer) ois.readObject();
 
@@ -45,14 +45,12 @@ public class UDP_Object2 {
             if (i < word.length - 2)
                 newName.append(" ");
         }
-        System.out.println(newName + " " + newUserName);
         newUserName.append(word[word.length - 1].toLowerCase());
         customer.setName(newName.toString());
         customer.setUserName(newUserName.toString());
 
         // b
         String[] part = customer.getDayOfBirth().split("-");
-        System.out.println(part[0] + "/" + part[1] + "/" + part[2]);
         StringBuilder newDay = new StringBuilder(part[1] + "/" + part[0] + "/" + part[2]);
         customer.setDayOfBirth(newDay.toString());
 

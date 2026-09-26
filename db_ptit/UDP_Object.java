@@ -27,10 +27,10 @@ public class UDP_Object {
         socket.receive(receivePacket);
 
         // Tach 8 byte dau de lay requestId
-        String requestId = new String(buffer, 0, 8);
+        String requestId = new String(receivePacket.getData(), 0, 8);
 
         // Tach cac byte con lai de lay Object Student
-        ByteArrayInputStream bais = new ByteArrayInputStream(buffer, 8, receivePacket.getLength() - 8);
+        ByteArrayInputStream bais = new ByteArrayInputStream(receivePacket.getData(), 8, receivePacket.getLength() - 8);
         ObjectInputStream ois = new ObjectInputStream(bais);
         Student student = (Student) ois.readObject();
 
